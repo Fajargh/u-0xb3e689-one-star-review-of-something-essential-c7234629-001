@@ -16,8 +16,8 @@ REVIEW = (
 MAX_CHARS = 160
 
 
-def validate(line: str) -> None:
-    """Guard the gate: 1-160 characters, a single line, not blank."""
+def validate_line(line: str) -> None:
+    """Guard the gate: 1-160 characters, a single line, non-blank UTF-8."""
     if not line or not line.strip():
         raise ValueError("review must not be blank")
     if "\n" in line or "\r" in line:
@@ -26,10 +26,14 @@ def validate(line: str) -> None:
         raise ValueError(
             f"review is {len(line)} characters, over the {MAX_CHARS} limit"
         )
+    try:
+        line.encode("utf-8")
+    except UnicodeEncodeError as exc:
+        raise ValueError("review must be valid UTF-8") from exc
 
 
 def main() -> int:
-    validate(REVIEW)
+    validate_line(REVIEW)
     os.makedirs("/output", exist_ok=True)
     # Write the review exactly, with no trailing newline, so the file
     # holds precisely the one line the judge reads.
